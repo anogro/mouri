@@ -186,10 +186,29 @@ function App() {
     return { give, spend, invest, wishlist };
   };
 
-  const handleRegister = (newParent: ParentProfile) => {
+  const handleRegister = async (newParent: ParentProfile) => {
     setParent(newParent);
     setCurrentChildId(newParent.children[0].id);
     setIsAuthenticated(true);
+    
+    // Send registration data to Google Sheets
+    try {
+      const childNamesStr = newParent.children.map(c => c.name).join(', ');
+      await fetch('https://script.google.com/macros/s/AKfycbwGQSGdMBxyoQHpEzl2xQmweDTDgN5wcpJ2bEXqR5fbY-tum6besm1dtEpfkVjOnAyaYQ/exec', {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({
+          action: 'REGISTER',
+          parentName: newParent.parentName,
+          email: newParent.email,
+          childrenCount: newParent.children.length,
+          childNames: childNamesStr
+        })
+      });
+      console.log('Registration info sent to Google Sheets');
+    } catch (error) {
+      console.error('Failed to send registration info:', error);
+    }
   };
 
   const handleLogout = () => {
