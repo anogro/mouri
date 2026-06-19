@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import type { ParentProfile, Transaction } from './types';
+import type { ParentProfile, ChildProfile, Transaction } from './types';
 import { Dashboard } from './components/Dashboard';
 import { LedgerForm } from './components/LedgerForm';
 import { SettingsPanel } from './components/SettingsPanel';
