@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChildProfile } from '../types';
+import type { ChildProfile } from '../types';
 import { Users } from 'lucide-react';
 
 interface Props {

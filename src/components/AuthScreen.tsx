@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ParentProfile, ChildProfile, BudgetRules } from '../types';
+import type { ParentProfile, ChildProfile, BudgetRules } from '../types';
 import { UserPlus, Lock, Mail, Users, ArrowRight, ShieldCheck } from 'lucide-react';
 
 interface Props {
@@ -18,7 +18,7 @@ const DEFAULT_RULES: BudgetRules = {
 };
 
 export const AuthScreen: React.FC<Props> = ({ onRegister, onLogin, existingProfile }) => {
-  const [isLoginMode, setIsLoginMode] = useState(!!existingProfile);
+  const [isLoginMode] = useState(!!existingProfile);
   const [parentName, setParentName] = useState('');
   const [email, setEmail] = useState('');
   const [pin, setPin] = useState('');
