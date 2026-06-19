@@ -57,6 +57,7 @@ export const AuthScreen: React.FC<Props> = ({ onRegister, onLogin, existingProfi
       name,
       rules: { ...DEFAULT_RULES },
       transactions: [],
+      pendingTransactions: [],
       premiumMode: false,
       wishlistTarget: 50000,
     }));
@@ -154,21 +155,25 @@ export const AuthScreen: React.FC<Props> = ({ onRegister, onLogin, existingProfi
                   <button type="button" onClick={handleAddChild} className="text-xs text-indigo-600 font-bold hover:underline">+ 자녀 추가</button>
                 </div>
                 <div className="space-y-2">
-                  {childNames.map((name, idx) => (
-                    <div key={idx} className="flex gap-2 relative">
-                      <Users className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                      <input 
-                        type="text" 
-                        value={name} 
-                        onChange={e => handleChildNameChange(idx, e.target.value)} 
-                        className="flex-1 bg-gray-50 border border-gray-200 rounded-lg pl-9 pr-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" 
-                        placeholder={`첫째 아이 이름`} 
-                      />
-                      {childNames.length > 1 && (
-                        <button type="button" onClick={() => handleRemoveChild(idx)} className="text-gray-400 hover:text-rose-500 px-2">✕</button>
-                      )}
-                    </div>
-                  ))}
+                  {childNames.map((name, idx) => {
+                    const prefixes = ['첫째', '둘째', '셋째', '넷째', '다섯째'];
+                    const placeholderText = prefixes[idx] ? `${prefixes[idx]} 아이 이름` : `${idx + 1}번째 아이 이름`;
+                    return (
+                      <div key={idx} className="flex gap-2 relative">
+                        <Users className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <input 
+                          type="text" 
+                          value={name} 
+                          onChange={e => handleChildNameChange(idx, e.target.value)} 
+                          className="flex-1 bg-gray-50 border border-gray-200 rounded-lg pl-9 pr-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" 
+                          placeholder={placeholderText} 
+                        />
+                        {childNames.length > 1 && (
+                          <button type="button" onClick={() => handleRemoveChild(idx)} className="text-gray-400 hover:text-rose-500 px-2">✕</button>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 

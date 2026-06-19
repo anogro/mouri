@@ -19,11 +19,18 @@ export interface Transaction {
   accountId?: 'GIVE' | 'SPEND' | 'INVEST' | 'WISHLIST';
 }
 
+export interface PendingTransaction {
+  id: string;
+  txInfo: Omit<Transaction, 'id' | 'date'>;
+  executeAt: number;
+}
+
 export interface ChildProfile {
   id: string; // UUID for DB
   name: string;
   rules: BudgetRules;
   transactions: Transaction[];
+  pendingTransactions: PendingTransaction[];
   premiumMode: boolean;
   wishlistTarget: number;
 }

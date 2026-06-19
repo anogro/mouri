@@ -33,11 +33,49 @@ function App() {
     }
   }, [parent, currentChildId]);
 
+  // Check for pending transactions (like 1-week bonuses)
+  useEffect(() => {
+    if (!parent) return;
+    const now = Date.now();
+    let hasChanges = false;
+    
+    const newParent = { ...parent };
+    newParent.children = newParent.children.map(child => {
+      const pending = child.pendingTransactions || [];
+      const due = pending.filter(p => now >= p.executeAt);
+      const remaining = pending.filter(p => now < p.executeAt);
+      
+      if (due.length > 0) {
+        hasChanges = true;
+        const newTxs = due.map(p => ({
+          ...p.txInfo,
+          id: Math.random().toString(36).substr(2, 9),
+          date: new Date().toISOString()
+        }));
+        
+        // Sync to Google Sheets
+        newTxs.forEach(tx => syncToGoogleSheets(tx, child));
+        
+        return {
+          ...child,
+          transactions: [...newTxs, ...child.transactions],
+          pendingTransactions: remaining
+        };
+      }
+      return child;
+    });
+
+    if (hasChanges) {
+      setParent(newParent);
+    }
+  }, [parent]);
+
   const currentChild = parent?.children.find(c => c.id === currentChildId) || null;
 
   // --- GOOGLE SHEETS API SYNC ---
-  const syncToGoogleSheets = async (data: any) => {
-    if (!parent || !currentChild) return;
+  const syncToGoogleSheets = async (data: any, childOverride?: ChildProfile) => {
+    const child = childOverride || currentChild;
+    if (!parent || !child) return;
     
     console.log('[Google Sheets API] Syncing data row:', data);
     try {
@@ -47,7 +85,7 @@ function App() {
           'Content-Type': 'text/plain',
         },
         body: JSON.stringify({
-          userId: `${parent.parentName}_${currentChild.name}_${currentChild.id.substring(0, 5)}`,
+          userId: `${parent.parentName}_${child.name}_${child.id.substring(0, 5)}`,
           ...data
         })
       });
@@ -98,9 +136,29 @@ function App() {
     }
 
     if (bonusAmount > 0) {
-      setTimeout(() => {
-        addTransaction({ type: 'BONUS', accountId: 'INVEST', category: '부모님 매칭 보너스', amount: bonusAmount, description: `${bonusType === 'SIMPLE' ? '단리' : '복리'} 이자` });
-      }, 500);
+      const executeAt = Date.now() + 7 * 24 * 60 * 60 * 1000; // 1 week in milliseconds
+      
+      setParent(prev => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          children: prev.children.map(c => 
+            c.id === currentChildId 
+              ? { 
+                  ...c, 
+                  pendingTransactions: [
+                    ...c.pendingTransactions, 
+                    {
+                      id: Math.random().toString(36).substr(2, 9),
+                      executeAt,
+                      txInfo: { type: 'BONUS', accountId: 'INVEST', category: '부모님 매칭 보너스', amount: bonusAmount, description: `[1주 뒤 지급] ${bonusType === 'SIMPLE' ? '단리' : '복리'} 이자` }
+                    }
+                  ] 
+                }
+              : c
+          )
+        };
+      });
     }
   };
 
