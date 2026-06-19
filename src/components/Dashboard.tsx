@@ -1,4 +1,5 @@
 import React from 'react';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 
 interface Props {
   state: {
@@ -6,7 +7,7 @@ interface Props {
     wishlistTarget: number;
     transactions: any[];
   };
-  calculateBalances: () => { give: number; spend: number; invest: number; wishlist: number };
+  calculateBalances: () => { give: number; spend: number; invest: number; extra: number; wishlist: number };
   childName?: string;
 }
 
@@ -24,13 +25,59 @@ export const Dashboard: React.FC<Props> = ({ state, calculateBalances, childName
     );
   };
 
+  const chartData = [
+    { name: '기부', value: balances.give > 0 ? balances.give : 0, color: '#fbcfe8' },
+    { name: '지출', value: balances.spend > 0 ? balances.spend : 0, color: '#fde68a' },
+    { name: '투자', value: balances.invest > 0 ? balances.invest : 0, color: '#a7f3d0' },
+  ];
+  
+  if (state.premiumMode) {
+    chartData.push({ name: '자유', value: balances.extra > 0 ? balances.extra : 0, color: '#e5e7eb' });
+    chartData.push({ name: '목표', value: balances.wishlist > 0 ? balances.wishlist : 0, color: '#bfdbfe' });
+  }
+
+  const hasData = chartData.some(d => d.value > 0);
+
   return (
     <div className="w-full max-w-5xl mx-auto p-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center tracking-tight">
         {childName ? `${childName}의 저금통` : '모으리 (Mouri) 대시보드'}
       </h2>
+
+      {state.premiumMode && (
+        <div className="mb-8 bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col items-center">
+          <h3 className="text-lg font-bold text-gray-700 mb-4">현재 잔액 비율 분석 (Premium)</h3>
+          <div className="w-full h-64">
+            {hasData ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={chartData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={80}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    {chartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value: number) => `${value.toLocaleString()}원`} />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex items-center justify-center h-full text-gray-400">
+                잔액이 없습니다
+              </div>
+            )}
+          </div>
+        </div>
+      )}
       
-      <div className={`grid grid-cols-1 md:grid-cols-3 gap-6 ${state.premiumMode ? 'lg:grid-cols-4' : ''}`}>
+      <div className={`grid grid-cols-1 md:grid-cols-3 gap-6 ${state.premiumMode ? 'lg:grid-cols-5' : ''}`}>
         {/* 기부 저금통 (Give) */}
         <div className="bg-pink-100 rounded-3xl p-6 shadow-sm border border-pink-200 flex flex-col items-center hover:shadow-md transition-shadow relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-32 h-32 bg-pink-200 rounded-full blur-3xl opacity-50 -mr-10 -mt-10 group-hover:opacity-70 transition-opacity"></div>
@@ -66,6 +113,23 @@ export const Dashboard: React.FC<Props> = ({ state, calculateBalances, childName
             <p className="text-xs opacity-80">키움증권 소수점 주식 모으기</p>
           </div>
         </div>
+
+        {/* 자유 저금통 (Extra - Premium) */}
+        {state.premiumMode && (
+          <div className="bg-gray-100 rounded-3xl p-6 shadow-sm border border-gray-200 flex flex-col items-center hover:shadow-md transition-shadow relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gray-200 rounded-full blur-3xl opacity-50 -mr-10 -mt-10 group-hover:opacity-70 transition-opacity"></div>
+            <div className="absolute top-3 right-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] px-2.5 py-1 rounded-full font-bold shadow-sm z-20">
+              PREMIUM
+            </div>
+            {renderMascot(balances.extra, 0)}
+            <h3 className="text-xl font-bold text-gray-800 mb-2 relative z-10">자유 저금통</h3>
+            <p className="text-3xl font-black text-gray-950 mb-6 relative z-10">{balances.extra.toLocaleString()}원</p>
+            <div className="w-full bg-white/60 backdrop-blur-sm p-4 rounded-2xl text-sm text-gray-800 text-center mt-auto relative z-10">
+              <p className="font-bold text-sm mb-1">💰 마음대로 쓰기</p>
+              <p className="text-xs opacity-80">조건 없는 비상금</p>
+            </div>
+          </div>
+        )}
 
         {/* 위시리스트 저금통 (Wishlist - Premium) */}
         {state.premiumMode && (

@@ -6,15 +6,17 @@ interface Props {
   rules: BudgetRules;
   premiumMode: boolean;
   wishlistTarget: number;
+  initialBalances: { give: number; spend: number; invest: number; extra: number };
   parentPin: string;
   onUpdateRules: (rules: BudgetRules) => void;
   onTogglePremium: (premium: boolean) => void;
   onUpdateWishlistTarget: (target: number) => void;
+  onUpdateInitialBalances: (balances: { give: number; spend: number; invest: number; extra: number }) => void;
 }
 
 export const SettingsPanel: React.FC<Props> = ({ 
-  rules, premiumMode, wishlistTarget, parentPin, 
-  onUpdateRules, onTogglePremium, onUpdateWishlistTarget 
+  rules, premiumMode, wishlistTarget, initialBalances, parentPin, 
+  onUpdateRules, onTogglePremium, onUpdateWishlistTarget, onUpdateInitialBalances
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isUnlocked, setIsUnlocked] = useState(false);
@@ -23,12 +25,14 @@ export const SettingsPanel: React.FC<Props> = ({
   
   const [localRules, setLocalRules] = useState<BudgetRules>(rules);
   const [localWishlist, setLocalWishlist] = useState<number>(wishlistTarget);
+  const [localInitialBalances, setLocalInitialBalances] = useState(initialBalances);
 
   // Sync state when props change (e.g. child switched)
   React.useEffect(() => {
     setLocalRules(rules);
     setLocalWishlist(wishlistTarget);
-  }, [rules, wishlistTarget]);
+    setLocalInitialBalances(initialBalances);
+  }, [rules, wishlistTarget, initialBalances]);
 
   const handleOpenClick = () => {
     setIsOpen(true);
@@ -51,6 +55,7 @@ export const SettingsPanel: React.FC<Props> = ({
   const handleSave = () => {
     onUpdateRules(localRules);
     onUpdateWishlistTarget(localWishlist);
+    onUpdateInitialBalances(localInitialBalances);
     setIsOpen(false);
   };
 
@@ -112,7 +117,7 @@ export const SettingsPanel: React.FC<Props> = ({
                   />
                 </div>
 
-                <div className="grid grid-cols-3 gap-4">
+                <div className={`grid gap-4 ${premiumMode ? 'grid-cols-4' : 'grid-cols-3'}`}>
                   <div>
                     <label className="block text-xs font-medium text-pink-600 mb-1">기부 배분</label>
                     <input 
@@ -140,6 +145,63 @@ export const SettingsPanel: React.FC<Props> = ({
                       className="w-full bg-emerald-50 border border-emerald-100 rounded-xl px-3 py-2 text-emerald-800 focus:outline-none focus:ring-1 focus:ring-emerald-400"
                     />
                   </div>
+                  {premiumMode && (
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">자유 배분</label>
+                      <input 
+                        type="number" 
+                        value={localRules.extraAmount}
+                        onChange={(e) => setLocalRules({...localRules, extraAmount: Number(e.target.value)})}
+                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-gray-800 focus:outline-none focus:ring-1 focus:ring-gray-400"
+                      />
+                    </div>
+                  )}
+                </div>
+              </section>
+
+              {/* 초기 잔액 설정 */}
+              <section className="mb-8">
+                <h3 className="font-bold text-gray-700 mb-4 border-b pb-2">기존 용돈 (초기 잔액) 설정</h3>
+                <p className="text-xs text-gray-500 mb-3">앱 시작 전에 이미 모아둔 용돈을 입력하세요.</p>
+                <div className={`grid gap-4 ${premiumMode ? 'grid-cols-4' : 'grid-cols-3'}`}>
+                  <div>
+                    <label className="block text-xs font-medium text-pink-600 mb-1">기존 기부</label>
+                    <input 
+                      type="number" 
+                      value={localInitialBalances.give}
+                      onChange={(e) => setLocalInitialBalances({...localInitialBalances, give: Number(e.target.value)})}
+                      className="w-full bg-pink-50 border border-pink-100 rounded-xl px-3 py-2 text-pink-800 focus:outline-none focus:ring-1 focus:ring-pink-400"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-amber-600 mb-1">기존 지출</label>
+                    <input 
+                      type="number" 
+                      value={localInitialBalances.spend}
+                      onChange={(e) => setLocalInitialBalances({...localInitialBalances, spend: Number(e.target.value)})}
+                      className="w-full bg-amber-50 border border-amber-100 rounded-xl px-3 py-2 text-amber-800 focus:outline-none focus:ring-1 focus:ring-amber-400"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-emerald-600 mb-1">기존 투자</label>
+                    <input 
+                      type="number" 
+                      value={localInitialBalances.invest}
+                      onChange={(e) => setLocalInitialBalances({...localInitialBalances, invest: Number(e.target.value)})}
+                      className="w-full bg-emerald-50 border border-emerald-100 rounded-xl px-3 py-2 text-emerald-800 focus:outline-none focus:ring-1 focus:ring-emerald-400"
+                    />
+                  </div>
+                  {premiumMode && (
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">기존 자유</label>
+                      <input 
+                        type="number" 
+                        value={localInitialBalances.extra}
+                        onChange={(e) => setLocalInitialBalances({...localInitialBalances, extra: Number(e.target.value)})}
+                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-gray-800 focus:outline-none focus:ring-1 focus:ring-gray-400"
+                      />
+                    </div>
+                  )}
                 </div>
               </section>
 

@@ -3,6 +3,7 @@ export interface BudgetRules {
   giveAmount: number;
   spendAmount: number;
   investAmount: number;
+  extraAmount: number; // 4th piggy bank (Premium)
   bonusType: 'SIMPLE' | 'COMPOUND';
   bonusRate: number; // Percentage, e.g., 50 for 50%, 5 for 5%
 }
@@ -29,6 +30,7 @@ export interface ChildProfile {
   id: string; // UUID for DB
   name: string;
   rules: BudgetRules;
+  initialBalances: { give: number; spend: number; invest: number; extra: number };
   transactions: Transaction[];
   pendingTransactions: PendingTransaction[];
   premiumMode: boolean;
@@ -39,6 +41,7 @@ export interface ParentProfile {
   parentName: string;
   email: string;
   pin: string; // 4-digit PIN
+  membershipTier: 'BASIC' | 'PREMIUM';
   children: ChildProfile[];
 }
 

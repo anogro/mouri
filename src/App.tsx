@@ -127,12 +127,13 @@ function App() {
     if (giveAmount > 0) addTransaction({ type: 'GIVE', accountId: 'GIVE', category: '정기 용돈', amount: giveAmount, description: '이번 주 기부 용돈' });
     if (spendAmount > 0) addTransaction({ type: 'GIVE', accountId: 'SPEND', category: '정기 용돈', amount: spendAmount, description: '이번 주 지출 용돈' });
     if (investAmount > 0) addTransaction({ type: 'GIVE', accountId: 'INVEST', category: '정기 용돈', amount: investAmount, description: '이번 주 투자 용돈' });
+    if (currentChild.rules.extraAmount > 0) addTransaction({ type: 'GIVE', accountId: 'EXTRA', category: '정기 용돈', amount: currentChild.rules.extraAmount, description: '이번 주 자유 저금통' });
 
     let bonusAmount = 0;
     if (bonusType === 'SIMPLE') {
       bonusAmount = Math.round(investAmount * (bonusRate / 100));
     } else {
-      const balances = calculateBalances();
+      const balances = calculateBalances(currentChild);
       bonusAmount = Math.round(balances.invest * (bonusRate / 100));
     }
 
@@ -163,27 +164,33 @@ function App() {
     }
   };
 
-  const calculateBalances = () => {
-    let give = 0;
-    let spend = 0;
-    let invest = 0;
+  const calculateBalances = (child: ChildProfile) => {
+    let give = child.initialBalances?.give || 0;
+    let spend = child.initialBalances?.spend || 0;
+    let invest = child.initialBalances?.invest || 0;
+    let extra = child.initialBalances?.extra || 0;
     let wishlist = 0;
 
-    if (!currentChild) return { give, spend, invest, wishlist };
-
-    currentChild.transactions.forEach(tx => {
-      const isDeduction = tx.type === 'SPEND';
-      const amount = isDeduction ? -tx.amount : tx.amount;
-
-      switch(tx.accountId) {
-        case 'GIVE': give += amount; break;
-        case 'SPEND': spend += amount; break;
-        case 'INVEST': invest += amount; break;
-        case 'WISHLIST': wishlist += amount; break;
+    child.transactions.forEach(t => {
+      if (t.accountId === 'GIVE') {
+        if (t.type === 'GIVE' || t.type === 'EARN' || t.type === 'BONUS') give += t.amount;
+        else if (t.type === 'SPEND') give -= t.amount;
+      } else if (t.accountId === 'SPEND') {
+        if (t.type === 'GIVE' || t.type === 'EARN' || t.type === 'BONUS') spend += t.amount;
+        else if (t.type === 'SPEND') spend -= t.amount;
+      } else if (t.accountId === 'INVEST') {
+        if (t.type === 'GIVE' || t.type === 'EARN' || t.type === 'BONUS') invest += t.amount;
+        else if (t.type === 'SPEND') invest -= t.amount;
+      } else if (t.accountId === 'EXTRA') {
+        if (t.type === 'GIVE' || t.type === 'EARN' || t.type === 'BONUS') extra += t.amount;
+        else if (t.type === 'SPEND') extra -= t.amount;
+      } else if (t.accountId === 'WISHLIST') {
+        if (t.type === 'GIVE' || t.type === 'EARN' || t.type === 'BONUS') wishlist += t.amount;
+        else if (t.type === 'SPEND') wishlist -= t.amount;
       }
     });
 
-    return { give, spend, invest, wishlist };
+    return { give, spend, invest, extra, wishlist };
   };
 
   const handleRegister = async (newParent: ParentProfile) => {
@@ -243,6 +250,17 @@ function App() {
         children: prev.children.map(c => c.id === currentChildId ? { ...c, wishlistTarget } : c)
       };
     });
+  };
+
+  const updateChildInitialBalances = (balances: { give: number; spend: number; invest: number; extra: number }) => {
+    if (!parent || !currentChildId) return;
+    const newParent = { ...parent };
+    const childIndex = newParent.children.findIndex(c => c.id === currentChildId);
+    if (childIndex !== -1) {
+      newParent.children[childIndex].initialBalances = balances;
+      setParent(newParent);
+      localStorage.setItem('mouri_parent', JSON.stringify(newParent));
+    }
   };
 
   const handleReset = () => {
@@ -317,10 +335,12 @@ function App() {
         rules={currentChild.rules}
         premiumMode={currentChild.premiumMode}
         wishlistTarget={currentChild.wishlistTarget}
+        initialBalances={currentChild.initialBalances || { give: 0, spend: 0, invest: 0, extra: 0 }}
         parentPin={parent?.pin || ''}
         onUpdateRules={updateChildRules}
         onTogglePremium={updateChildPremium}
         onUpdateWishlistTarget={updateChildWishlist}
+        onUpdateInitialBalances={updateChildInitialBalances}
       />
     </div>
   );
