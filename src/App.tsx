@@ -30,22 +30,20 @@ function App() {
     console.log('[Google Sheets API] Syncing data row:', data);
     
     try {
-      // API call to Vercel Serverless Function
-      const response = await fetch('/api/sync', {
+      // API call to Google Apps Script Web App
+      const response = await fetch('https://script.google.com/macros/s/AKfycbwGQSGdMBxyoQHpEzl2xQmweDTDgN5wcpJ2bEXqR5fbY-tum6besm1dtEpfkVjOnAyaYQ/exec', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'text/plain', // Apps Script CORS 이슈 방지를 위해 text/plain 권장
         },
         body: JSON.stringify({
-          userId: 'Family_01', // User ID (Mock for now, can be added to Settings)
+          userId: 'Family_01', 
           ...data
         })
       });
       
-      const result = await response.json();
-      if (!result.success) {
-        console.error('Sync failed:', result.error);
-      }
+      // Apps Script는 성공 시 success: true 반환
+      console.log('Sync response status:', response.status);
     } catch (error) {
       console.error('Network error during sync:', error);
     } finally {
