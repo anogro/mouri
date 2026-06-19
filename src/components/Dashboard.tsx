@@ -1,12 +1,16 @@
 import React from 'react';
-import type { AppState } from '../types';
 
 interface Props {
-  state: AppState;
+  state: {
+    premiumMode: boolean;
+    wishlistTarget: number;
+    transactions: any[];
+  };
   calculateBalances: () => { give: number; spend: number; invest: number; wishlist: number };
+  childName?: string;
 }
 
-export const Dashboard: React.FC<Props> = ({ state, calculateBalances }) => {
+export const Dashboard: React.FC<Props> = ({ state, calculateBalances, childName }) => {
   const balances = calculateBalances();
 
   const renderMascot = (balance: number, target: number = 0) => {
@@ -22,7 +26,9 @@ export const Dashboard: React.FC<Props> = ({ state, calculateBalances }) => {
 
   return (
     <div className="w-full max-w-5xl mx-auto p-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center tracking-tight">모으리 (Mouri) 대시보드</h2>
+      <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center tracking-tight">
+        {childName ? `${childName}의 저금통` : '모으리 (Mouri) 대시보드'}
+      </h2>
       
       <div className={`grid grid-cols-1 md:grid-cols-3 gap-6 ${state.premiumMode ? 'lg:grid-cols-4' : ''}`}>
         {/* 기부 저금통 (Give) */}

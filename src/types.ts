@@ -19,9 +19,24 @@ export interface Transaction {
   accountId?: 'GIVE' | 'SPEND' | 'INVEST' | 'WISHLIST';
 }
 
-export interface AppState {
+export interface ChildProfile {
+  id: string; // UUID for DB
+  name: string;
   rules: BudgetRules;
   transactions: Transaction[];
   premiumMode: boolean;
   wishlistTarget: number;
+}
+
+export interface ParentProfile {
+  parentName: string;
+  email: string;
+  pin: string; // 4-digit PIN
+  children: ChildProfile[];
+}
+
+export interface AppState {
+  parent: ParentProfile | null;
+  currentChildId: string | null;
+  isAuthenticated: boolean; // True if parent is logged in to change settings or during onboarding
 }

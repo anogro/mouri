@@ -1,86 +1,98 @@
-import { useState } from 'react';
-import type { AppState, BudgetRules, Transaction } from './types';
+import { useState, useEffect } from 'react';
+import type { ParentProfile, ChildProfile, Transaction } from './types';
 import { Dashboard } from './components/Dashboard';
 import { LedgerForm } from './components/LedgerForm';
 import { SettingsPanel } from './components/SettingsPanel';
-import { Coins, Loader2 } from 'lucide-react';
-
-const INITIAL_RULES: BudgetRules = {
-  totalAmount: 5000,
-  giveAmount: 500,
-  spendAmount: 3000,
-  investAmount: 1500,
-  bonusType: 'SIMPLE',
-  bonusRate: 50,
-};
+import { AuthScreen } from './components/AuthScreen';
+import { ChildSelector } from './components/ChildSelector';
+import { Coins, LogOut } from 'lucide-react';
 
 function App() {
-  const [state, setState] = useState<AppState>({
-    rules: INITIAL_RULES,
-    transactions: [],
-    premiumMode: false,
-    wishlistTarget: 50000,
+  const [parent, setParent] = useState<ParentProfile | null>(() => {
+    const saved = localStorage.getItem('mouri_parent');
+    return saved ? JSON.parse(saved) : null;
   });
   
-  const [isSyncing, setIsSyncing] = useState(false);
+  const [currentChildId, setCurrentChildId] = useState<string | null>(() => {
+    const saved = localStorage.getItem('mouri_parent');
+    if (saved) {
+      const p = JSON.parse(saved);
+      return p.children.length > 0 ? p.children[0].id : null;
+    }
+    return null;
+  });
+
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    if (parent) {
+      localStorage.setItem('mouri_parent', JSON.stringify(parent));
+      if (!currentChildId && parent.children.length > 0) {
+        setCurrentChildId(parent.children[0].id);
+      }
+    }
+  }, [parent, currentChildId]);
+
+  const currentChild = parent?.children.find(c => c.id === currentChildId) || null;
 
   // --- GOOGLE SHEETS API SYNC ---
   const syncToGoogleSheets = async (data: any) => {
-    setIsSyncing(true);
-    console.log('[Google Sheets API] Syncing data row:', data);
+    if (!parent || !currentChild) return;
     
+    console.log('[Google Sheets API] Syncing data row:', data);
     try {
-      // API call to Google Apps Script Web App
       const response = await fetch('https://script.google.com/macros/s/AKfycbwGQSGdMBxyoQHpEzl2xQmweDTDgN5wcpJ2bEXqR5fbY-tum6besm1dtEpfkVjOnAyaYQ/exec', {
         method: 'POST',
         headers: {
-          'Content-Type': 'text/plain', // Apps Script CORS 이슈 방지를 위해 text/plain 권장
+          'Content-Type': 'text/plain',
         },
         body: JSON.stringify({
-          userId: 'Family_01', 
+          userId: `${parent.parentName}_${currentChild.name}_${currentChild.id.substring(0, 5)}`,
           ...data
         })
       });
-      
-      // Apps Script는 성공 시 success: true 반환
       console.log('Sync response status:', response.status);
     } catch (error) {
       console.error('Network error during sync:', error);
-    } finally {
-      setIsSyncing(false);
     }
   };
 
   const addTransaction = (txInfo: Omit<Transaction, 'id' | 'date'>) => {
+    if (!parent || !currentChildId) return;
+
     const newTx: Transaction = {
       ...txInfo,
       id: Math.random().toString(36).substr(2, 9),
       date: new Date().toISOString()
     };
     
-    setState(prev => ({
-      ...prev,
-      transactions: [newTx, ...prev.transactions]
-    }));
+    setParent(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        children: prev.children.map(c => 
+          c.id === currentChildId 
+            ? { ...c, transactions: [newTx, ...c.transactions] }
+            : c
+        )
+      };
+    });
     
     syncToGoogleSheets(newTx);
   };
 
   const handleGiveAllowance = () => {
-    const { giveAmount, spendAmount, investAmount, bonusType, bonusRate } = state.rules;
+    if (!currentChild) return;
+    const { giveAmount, spendAmount, investAmount, bonusType, bonusRate } = currentChild.rules;
     
-    // 1. Give basic allowance
     if (giveAmount > 0) addTransaction({ type: 'GIVE', accountId: 'GIVE', category: '정기 용돈', amount: giveAmount, description: '이번 주 기부 용돈' });
     if (spendAmount > 0) addTransaction({ type: 'GIVE', accountId: 'SPEND', category: '정기 용돈', amount: spendAmount, description: '이번 주 지출 용돈' });
     if (investAmount > 0) addTransaction({ type: 'GIVE', accountId: 'INVEST', category: '정기 용돈', amount: investAmount, description: '이번 주 투자 용돈' });
 
-    // 2. Calculate Bonus for Invest
     let bonusAmount = 0;
     if (bonusType === 'SIMPLE') {
-      // Simple Interest: Parent matches a % of the *current week's* invest amount.
       bonusAmount = Math.round(investAmount * (bonusRate / 100));
     } else {
-      // Compound Interest (Premium): Parent matches a % of the *entire current balance*.
       const balances = calculateBalances();
       bonusAmount = Math.round(balances.invest * (bonusRate / 100));
     }
@@ -88,7 +100,7 @@ function App() {
     if (bonusAmount > 0) {
       setTimeout(() => {
         addTransaction({ type: 'BONUS', accountId: 'INVEST', category: '부모님 매칭 보너스', amount: bonusAmount, description: `${bonusType === 'SIMPLE' ? '단리' : '복리'} 이자` });
-      }, 500); // slight delay for UI effect
+      }, 500);
     }
   };
 
@@ -98,7 +110,9 @@ function App() {
     let invest = 0;
     let wishlist = 0;
 
-    state.transactions.forEach(tx => {
+    if (!currentChild) return { give, spend, invest, wishlist };
+
+    currentChild.transactions.forEach(tx => {
       const isDeduction = tx.type === 'SPEND';
       const amount = isDeduction ? -tx.amount : tx.amount;
 
@@ -113,6 +127,53 @@ function App() {
     return { give, spend, invest, wishlist };
   };
 
+  const handleRegister = (newParent: ParentProfile) => {
+    setParent(newParent);
+    setCurrentChildId(newParent.children[0].id);
+    setIsAuthenticated(true);
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+  };
+
+  const updateChildRules = (rules: any) => {
+    setParent(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        children: prev.children.map(c => c.id === currentChildId ? { ...c, rules } : c)
+      };
+    });
+  };
+
+  const updateChildPremium = (premiumMode: boolean) => {
+    setParent(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        children: prev.children.map(c => c.id === currentChildId ? { ...c, premiumMode } : c)
+      };
+    });
+  };
+
+  const updateChildWishlist = (wishlistTarget: number) => {
+    setParent(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        children: prev.children.map(c => c.id === currentChildId ? { ...c, wishlistTarget } : c)
+      };
+    });
+  };
+
+  // If not authenticated, show Auth Screen
+  if (!isAuthenticated) {
+    return <AuthScreen onRegister={handleRegister} onLogin={() => setIsAuthenticated(true)} existingProfile={parent} />;
+  }
+
+  if (!currentChild) return null;
+
   return (
     <div className="min-h-screen bg-gray-50 pb-20 font-sans selection:bg-indigo-100">
       <header className="bg-white sticky top-0 z-40 border-b border-gray-100 shadow-sm/50 backdrop-blur-md bg-white/80">
@@ -125,39 +186,56 @@ function App() {
           </div>
           
           <div className="flex items-center gap-4">
-            {isSyncing && (
-              <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-400 bg-gray-100 px-3 py-1.5 rounded-full animate-pulse">
-                <Loader2 className="w-3 h-3 animate-spin" /> 구글 시트 동기화 중...
-              </div>
-            )}
             <button 
               onClick={handleGiveAllowance}
               className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl font-bold text-sm shadow-sm transition-all active:scale-95 flex items-center gap-2"
             >
               <Coins className="w-4 h-4" /> 용돈 주기
             </button>
+            <button onClick={handleLogout} className="text-gray-400 hover:text-gray-600 p-2">
+              <LogOut className="w-5 h-5" />
+            </button>
           </div>
         </div>
+        {parent && parent.children.length > 1 && (
+          <ChildSelector 
+            childrenProfiles={parent.children} 
+            currentChildId={currentChild.id} 
+            onSelectChild={setCurrentChildId} 
+          />
+        )}
       </header>
 
       <main className="pt-8 space-y-12">
         <Dashboard 
-          state={state} 
+          state={{
+            rules: currentChild.rules,
+            premiumMode: currentChild.premiumMode,
+            wishlistTarget: currentChild.wishlistTarget,
+            transactions: currentChild.transactions,
+            parent,
+            currentChildId,
+            isAuthenticated
+          } as any} // Pass modified state just for dashboard to extract premium/wishlist
           calculateBalances={calculateBalances} 
+          childName={currentChild.name}
         />
         
         <LedgerForm 
-          transactions={state.transactions} 
-          premiumMode={state.premiumMode}
+          transactions={currentChild.transactions} 
+          premiumMode={currentChild.premiumMode}
           onAddTransaction={addTransaction}
         />
       </main>
 
       <SettingsPanel 
-        state={state}
-        onUpdateRules={(rules) => setState(prev => ({...prev, rules}))}
-        onTogglePremium={(premium) => setState(prev => ({...prev, premiumMode: premium}))}
-        onUpdateWishlistTarget={(target) => setState(prev => ({...prev, wishlistTarget: target}))}
+        rules={currentChild.rules}
+        premiumMode={currentChild.premiumMode}
+        wishlistTarget={currentChild.wishlistTarget}
+        parentPin={parent?.pin || ''}
+        onUpdateRules={updateChildRules}
+        onTogglePremium={updateChildPremium}
+        onUpdateWishlistTarget={updateChildWishlist}
       />
     </div>
   );
