@@ -86,6 +86,7 @@ function App() {
         },
         body: JSON.stringify({
           userId: `${parent.parentName}_${child.name}_${child.id.substring(0, 5)}`,
+          childName: child.name,
           ...data
         })
       });
