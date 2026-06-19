@@ -8,7 +8,7 @@ export interface BudgetRules {
   bonusRate: number; // Percentage, e.g., 50 for 50%, 5 for 5%
 }
 
-export type TransactionType = 'GIVE' | 'SPEND' | 'INVEST' | 'BONUS' | 'WISHLIST';
+export type TransactionType = 'GIVE' | 'SPEND' | 'INVEST' | 'EARN' | 'BONUS' | 'WISHLIST';
 
 export interface Transaction {
   id: string;
@@ -17,7 +17,7 @@ export interface Transaction {
   amount: number;
   description: string;
   date: string;
-  accountId?: 'GIVE' | 'SPEND' | 'INVEST' | 'WISHLIST';
+  accountId?: 'GIVE' | 'SPEND' | 'INVEST' | 'EXTRA' | 'WISHLIST';
 }
 
 export interface PendingTransaction {

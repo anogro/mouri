@@ -64,7 +64,7 @@ export const Dashboard: React.FC<Props> = ({ state, calculateBalances, childName
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value: number) => `${value.toLocaleString()}원`} />
+                  <Tooltip formatter={(value: any) => `${Number(value).toLocaleString()}원`} />
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>

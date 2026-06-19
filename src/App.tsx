@@ -320,7 +320,7 @@ function App() {
             currentChildId,
             isAuthenticated
           } as any} // Pass modified state just for dashboard to extract premium/wishlist
-          calculateBalances={calculateBalances} 
+          calculateBalances={() => calculateBalances(currentChild)} 
           childName={currentChild.name}
         />
         

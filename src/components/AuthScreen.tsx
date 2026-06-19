@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import type { ParentProfile, ChildProfile, BudgetRules } from '../types';
+import type { ParentProfile, BudgetRules } from '../types';
 import { UserPlus, Lock, Mail, Users, ArrowRight, ShieldCheck } from 'lucide-react';
 
 interface Props {
