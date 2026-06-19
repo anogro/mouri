@@ -79,7 +79,7 @@ function App() {
     
     console.log('[Google Sheets API] Syncing data row:', data);
     try {
-      const response = await fetch('https://script.google.com/macros/s/AKfycbyEZlyI7iVfzIorSTS22-VYWaOEs2kHMT0sx-6k8wJ8BVibAxTMsX6VV7TM6mtN5vvjyg/exec', {
+      const response = await fetch('https://script.google.com/macros/s/AKfycbwHHmt5UVqsRRaLm5sdx6np60loJkNOl17y6Qtq0ADDxgWCqkPDwGMClsudAh2YtKOU_w/exec', {
         method: 'POST',
         headers: {
           'Content-Type': 'text/plain',
@@ -194,7 +194,7 @@ function App() {
     // Send registration data to Google Sheets
     try {
       const childNamesStr = newParent.children.map(c => c.name).join(', ');
-      await fetch('https://script.google.com/macros/s/AKfycbyEZlyI7iVfzIorSTS22-VYWaOEs2kHMT0sx-6k8wJ8BVibAxTMsX6VV7TM6mtN5vvjyg/exec', {
+      await fetch('https://script.google.com/macros/s/AKfycbwHHmt5UVqsRRaLm5sdx6np60loJkNOl17y6Qtq0ADDxgWCqkPDwGMClsudAh2YtKOU_w/exec', {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify({
