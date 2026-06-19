@@ -24,24 +24,33 @@ function App() {
   
   const [isSyncing, setIsSyncing] = useState(false);
 
-  // --- MOCK GOOGLE SHEETS API ---
-  // In a real app, this would use fetch() with Google Sheets API (or via a backend proxy/Vercel serverless function).
+  // --- GOOGLE SHEETS API SYNC ---
   const syncToGoogleSheets = async (data: any) => {
     setIsSyncing(true);
-    console.log('[Google Sheets Mock] Syncing data row:', data);
+    console.log('[Google Sheets API] Syncing data row:', data);
     
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    /* 
-      Real implementation guide:
-      const response = await fetch('https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec', {
+    try {
+      // API call to Vercel Serverless Function
+      const response = await fetch('/api/sync', {
         method: 'POST',
-        body: JSON.stringify(data)
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: 'Family_01', // User ID (Mock for now, can be added to Settings)
+          ...data
+        })
       });
-      return response.json();
-    */
-    setIsSyncing(false);
+      
+      const result = await response.json();
+      if (!result.success) {
+        console.error('Sync failed:', result.error);
+      }
+    } catch (error) {
+      console.error('Network error during sync:', error);
+    } finally {
+      setIsSyncing(false);
+    }
   };
 
   const addTransaction = (txInfo: Omit<Transaction, 'id' | 'date'>) => {
