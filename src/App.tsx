@@ -5,6 +5,7 @@ import { LedgerForm } from './components/LedgerForm';
 import { SettingsPanel } from './components/SettingsPanel';
 import { AuthScreen } from './components/AuthScreen';
 import { ChildSelector } from './components/ChildSelector';
+import { AdminPage } from './components/AdminPage';
 import { Coins, LogOut } from 'lucide-react';
 
 function App() {
@@ -263,12 +264,28 @@ function App() {
     }
   };
 
+  const handleAdminUpgrade = () => {
+    if (!parent) return;
+    const newParent = { ...parent, membershipTier: 'PREMIUM' as const };
+    newParent.children = newParent.children.map(child => ({
+      ...child,
+      premiumMode: true
+    }));
+    setParent(newParent);
+    localStorage.setItem('mouri_parent', JSON.stringify(newParent));
+  };
+
   const handleReset = () => {
     localStorage.removeItem('mouri_parent');
     setParent(null);
     setCurrentChildId(null);
     setIsAuthenticated(false);
   };
+
+  // Admin Route
+  if (window.location.pathname === '/admin') {
+    return <AdminPage parent={parent} onUpgrade={handleAdminUpgrade} />;
+  }
 
   // If not authenticated, show Auth Screen
   if (!isAuthenticated) {
@@ -327,6 +344,7 @@ function App() {
         <LedgerForm 
           transactions={currentChild.transactions} 
           premiumMode={currentChild.premiumMode}
+          rules={currentChild.rules}
           onAddTransaction={addTransaction}
         />
       </main>

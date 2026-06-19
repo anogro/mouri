@@ -5,10 +5,11 @@ import { PlusCircle, MinusCircle, Wallet, Coffee, Gamepad2, Gift, Pencil, Star }
 interface Props {
   transactions: Transaction[];
   premiumMode: boolean;
+  rules?: any;
   onAddTransaction: (t: Omit<Transaction, 'id' | 'date'>) => void;
 }
 
-export const LedgerForm: React.FC<Props> = ({ transactions, premiumMode, onAddTransaction }) => {
+export const LedgerForm: React.FC<Props> = ({ transactions, premiumMode, rules, onAddTransaction }) => {
   const [type, setType] = useState<TransactionType>('SPEND');
   const [accountId, setAccountId] = useState<'GIVE' | 'SPEND' | 'INVEST' | 'EXTRA' | 'WISHLIST'>('SPEND');
   const [amount, setAmount] = useState<string>('');
@@ -50,12 +51,19 @@ export const LedgerForm: React.FC<Props> = ({ transactions, premiumMode, onAddTr
     }
   };
 
+  const custom = rules?.customAccounts || {
+    give: { name: '기부 통장', emoji: '🤝' },
+    spend: { name: '지출 통장', emoji: '💳' },
+    invest: { name: '투자 통장', emoji: '📈' },
+    extra: { name: '자유 저금통', emoji: '💰' }
+  };
+
   const getAccountName = (id: string) => {
     switch(id) {
-      case 'GIVE': return '기부 통장';
-      case 'SPEND': return '지출 통장';
-      case 'INVEST': return '투자 통장';
-      case 'EXTRA': return '자유 저금통';
+      case 'GIVE': return custom.give.name;
+      case 'SPEND': return custom.spend.name;
+      case 'INVEST': return custom.invest.name;
+      case 'EXTRA': return custom.extra.name;
       case 'WISHLIST': return '위시리스트';
       default: return '기타';
     }
@@ -90,12 +98,12 @@ export const LedgerForm: React.FC<Props> = ({ transactions, premiumMode, onAddTr
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-2">어느 저금통에서?</label>
             <div className="grid grid-cols-3 gap-2">
-              <button type="button" onClick={() => setAccountId('GIVE')} className={`py-2 text-xs font-bold rounded-xl border transition-colors ${accountId === 'GIVE' ? 'bg-pink-100 border-pink-200 text-pink-700' : 'bg-gray-50 border-gray-200 text-gray-500 hover:bg-gray-100'}`}>기부</button>
-              <button type="button" onClick={() => setAccountId('SPEND')} className={`py-2 text-xs font-bold rounded-xl border transition-colors ${accountId === 'SPEND' ? 'bg-amber-100 border-amber-200 text-amber-800' : 'bg-gray-50 border-gray-200 text-gray-500 hover:bg-gray-100'}`}>지출</button>
-              <button type="button" onClick={() => setAccountId('INVEST')} className={`py-2 text-xs font-bold rounded-xl border transition-colors ${accountId === 'INVEST' ? 'bg-emerald-100 border-emerald-200 text-emerald-800' : 'bg-gray-50 border-gray-200 text-gray-500 hover:bg-gray-100'}`}>투자</button>
+              <button type="button" onClick={() => setAccountId('GIVE')} className={`py-2 text-xs font-bold rounded-xl border transition-colors ${accountId === 'GIVE' ? 'bg-pink-100 border-pink-200 text-pink-700' : 'bg-gray-50 border-gray-200 text-gray-500 hover:bg-gray-100'}`}>{custom.give.name.substring(0,2)}</button>
+              <button type="button" onClick={() => setAccountId('SPEND')} className={`py-2 text-xs font-bold rounded-xl border transition-colors ${accountId === 'SPEND' ? 'bg-amber-100 border-amber-200 text-amber-800' : 'bg-gray-50 border-gray-200 text-gray-500 hover:bg-gray-100'}`}>{custom.spend.name.substring(0,2)}</button>
+              <button type="button" onClick={() => setAccountId('INVEST')} className={`py-2 text-xs font-bold rounded-xl border transition-colors ${accountId === 'INVEST' ? 'bg-emerald-100 border-emerald-200 text-emerald-800' : 'bg-gray-50 border-gray-200 text-gray-500 hover:bg-gray-100'}`}>{custom.invest.name.substring(0,2)}</button>
               {premiumMode && (
                 <>
-                  <button type="button" onClick={() => setAccountId('EXTRA')} className={`py-2 text-xs font-bold rounded-xl border transition-colors ${accountId === 'EXTRA' ? 'bg-gray-200 border-gray-300 text-gray-800' : 'bg-gray-50 border-gray-200 text-gray-500 hover:bg-gray-100'}`}>자유</button>
+                  <button type="button" onClick={() => setAccountId('EXTRA')} className={`py-2 text-xs font-bold rounded-xl border transition-colors ${accountId === 'EXTRA' ? 'bg-gray-200 border-gray-300 text-gray-800' : 'bg-gray-50 border-gray-200 text-gray-500 hover:bg-gray-100'}`}>{custom.extra.name.substring(0,2)}</button>
                   <button type="button" onClick={() => setAccountId('WISHLIST')} className={`col-span-2 py-2 text-xs font-bold rounded-xl border transition-colors ${accountId === 'WISHLIST' ? 'bg-blue-100 border-blue-200 text-blue-800' : 'bg-gray-50 border-gray-200 text-gray-500 hover:bg-gray-100'}`}>위시리스트 (프리미엄)</button>
                 </>
               )}

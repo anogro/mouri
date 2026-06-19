@@ -24,7 +24,6 @@ export const AuthScreen: React.FC<Props> = ({ onRegister, onLogin, onReset, exis
   const [parentName, setParentName] = useState('');
   const [email, setEmail] = useState('');
   const [pin, setPin] = useState('');
-  const [membershipTier, setMembershipTier] = useState<'BASIC' | 'PREMIUM'>('BASIC');
   const [childNames, setChildNames] = useState<string[]>(['']);
   
   const [loginPin, setLoginPin] = useState('');
@@ -59,15 +58,23 @@ export const AuthScreen: React.FC<Props> = ({ onRegister, onLogin, onReset, exis
       parentName,
       email,
       pin,
-      membershipTier,
+      membershipTier: 'BASIC',
       children: validChildren.map((name) => ({
         id: crypto.randomUUID ? crypto.randomUUID() : `child_${Math.random().toString(36).substr(2, 9)}`,
         name,
-        rules: { ...DEFAULT_RULES },
+        rules: { 
+          ...DEFAULT_RULES,
+          customAccounts: {
+            give: { name: '기부 저금통', emoji: '🤝' },
+            spend: { name: '지출 저금통', emoji: '💳' },
+            invest: { name: '투자 저금통', emoji: '📈' },
+            extra: { name: '자유 저금통', emoji: '💰' }
+          }
+        },
         initialBalances: { give: 0, spend: 0, invest: 0, extra: 0 },
         transactions: [],
         pendingTransactions: [],
-        premiumMode: membershipTier === 'PREMIUM',
+        premiumMode: false,
         wishlistTarget: 50000,
       }))
     };
@@ -193,28 +200,6 @@ export const AuthScreen: React.FC<Props> = ({ onRegister, onLogin, onReset, exis
                       </div>
                     );
                   })}
-                </div>
-              </div>
-
-              <div className="pt-2 border-t border-gray-100">
-                <label className="block text-xs font-bold text-gray-700 mb-2">멤버십 선택</label>
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setMembershipTier('BASIC')}
-                    className={`p-3 rounded-xl border-2 text-left transition-colors ${membershipTier === 'BASIC' ? 'border-indigo-600 bg-indigo-50' : 'border-gray-200 hover:border-indigo-300'}`}
-                  >
-                    <div className="font-bold text-sm text-gray-800">베이직 (무료)</div>
-                    <div className="text-xs text-gray-500 mt-1">3개의 저금통, 기본 통계</div>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setMembershipTier('PREMIUM')}
-                    className={`p-3 rounded-xl border-2 text-left transition-colors ${membershipTier === 'PREMIUM' ? 'border-amber-500 bg-amber-50' : 'border-gray-200 hover:border-amber-300'}`}
-                  >
-                    <div className="font-bold text-sm text-amber-700">👑 프리미엄</div>
-                    <div className="text-xs text-amber-600 mt-1">자유 저금통 추가, 파이 차트</div>
-                  </button>
                 </div>
               </div>
 

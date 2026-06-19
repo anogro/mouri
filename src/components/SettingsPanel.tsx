@@ -258,6 +258,47 @@ export const SettingsPanel: React.FC<Props> = ({
                       <span className="font-bold text-indigo-800">%</span>
                     </div>
                   </div>
+
+                  <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 mt-4">
+                    <label className="block text-xs font-bold text-indigo-700 mb-2">저금통 이름 및 이모지 설정</label>
+                    <div className="space-y-3">
+                      {['give', 'spend', 'invest', 'extra'].map((key) => {
+                        const accKey = key as 'give' | 'spend' | 'invest' | 'extra';
+                        const acc = localRules.customAccounts?.[accKey] || {
+                          name: accKey === 'give' ? '기부 저금통' : accKey === 'spend' ? '지출 저금통' : accKey === 'invest' ? '투자 저금통' : '자유 저금통',
+                          emoji: accKey === 'give' ? '🤝' : accKey === 'spend' ? '💳' : accKey === 'invest' ? '📈' : '💰'
+                        };
+                        return (
+                          <div key={key} className="flex gap-2">
+                            <input 
+                              type="text" 
+                              value={acc.emoji}
+                              onChange={(e) => {
+                                const newCustom = { ...(localRules.customAccounts || {} as any) };
+                                if (!newCustom[accKey]) newCustom[accKey] = { ...acc };
+                                newCustom[accKey].emoji = e.target.value;
+                                setLocalRules({...localRules, customAccounts: newCustom});
+                              }}
+                              className="w-12 bg-white border border-indigo-200 rounded-lg px-2 py-2 text-center"
+                              placeholder="이모지"
+                            />
+                            <input 
+                              type="text" 
+                              value={acc.name}
+                              onChange={(e) => {
+                                const newCustom = { ...(localRules.customAccounts || {} as any) };
+                                if (!newCustom[accKey]) newCustom[accKey] = { ...acc };
+                                newCustom[accKey].name = e.target.value;
+                                setLocalRules({...localRules, customAccounts: newCustom});
+                              }}
+                              className="flex-1 bg-white border border-indigo-200 rounded-lg px-3 py-2 text-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                              placeholder="저금통 이름"
+                            />
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
                 </div>
               </section>
             </div>

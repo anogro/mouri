@@ -6,6 +6,12 @@ export interface BudgetRules {
   extraAmount: number; // 4th piggy bank (Premium)
   bonusType: 'SIMPLE' | 'COMPOUND';
   bonusRate: number; // Percentage, e.g., 50 for 50%, 5 for 5%
+  customAccounts?: {
+    give: { name: string; emoji: string };
+    spend: { name: string; emoji: string };
+    invest: { name: string; emoji: string };
+    extra: { name: string; emoji: string };
+  };
 }
 
 export type TransactionType = 'GIVE' | 'SPEND' | 'INVEST' | 'EARN' | 'BONUS' | 'WISHLIST';

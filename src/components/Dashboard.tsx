@@ -6,6 +6,7 @@ interface Props {
     premiumMode: boolean;
     wishlistTarget: number;
     transactions: any[];
+    rules?: any;
   };
   calculateBalances: () => { give: number; spend: number; invest: number; extra: number; wishlist: number };
   childName?: string;
@@ -14,25 +15,32 @@ interface Props {
 export const Dashboard: React.FC<Props> = ({ state, calculateBalances, childName }) => {
   const balances = calculateBalances();
 
-  const renderMascot = (balance: number, target: number = 0) => {
+  const custom = state.rules?.customAccounts || {
+    give: { name: '기부 저금통', emoji: '🤝' },
+    spend: { name: '지출 저금통', emoji: '💳' },
+    invest: { name: '투자 저금통', emoji: '📈' },
+    extra: { name: '자유 저금통', emoji: '💰' }
+  };
+
+  const renderMascot = (balance: number, target: number = 0, defaultEmoji: string) => {
     const isHungry = balance <= target;
     return (
       <div className="flex justify-center mb-4 transition-transform hover:scale-110 cursor-pointer">
         <div className={`w-20 h-20 rounded-full flex items-center justify-center text-4xl shadow-md transition-all duration-300 ${isHungry ? 'bg-white opacity-90' : 'bg-white'}`}>
-          {isHungry ? '😢' : '😍'}
+          {isHungry ? '😢' : defaultEmoji}
         </div>
       </div>
     );
   };
 
   const chartData = [
-    { name: '기부', value: balances.give > 0 ? balances.give : 0, color: '#fbcfe8' },
-    { name: '지출', value: balances.spend > 0 ? balances.spend : 0, color: '#fde68a' },
-    { name: '투자', value: balances.invest > 0 ? balances.invest : 0, color: '#a7f3d0' },
+    { name: custom.give.name.substring(0,4), value: balances.give > 0 ? balances.give : 0, color: '#fbcfe8' },
+    { name: custom.spend.name.substring(0,4), value: balances.spend > 0 ? balances.spend : 0, color: '#fde68a' },
+    { name: custom.invest.name.substring(0,4), value: balances.invest > 0 ? balances.invest : 0, color: '#a7f3d0' },
   ];
   
   if (state.premiumMode) {
-    chartData.push({ name: '자유', value: balances.extra > 0 ? balances.extra : 0, color: '#e5e7eb' });
+    chartData.push({ name: custom.extra.name.substring(0,4), value: balances.extra > 0 ? balances.extra : 0, color: '#e5e7eb' });
     chartData.push({ name: '목표', value: balances.wishlist > 0 ? balances.wishlist : 0, color: '#bfdbfe' });
   }
 
@@ -78,54 +86,48 @@ export const Dashboard: React.FC<Props> = ({ state, calculateBalances, childName
       )}
       
       <div className={`grid grid-cols-1 md:grid-cols-3 gap-6 ${state.premiumMode ? 'lg:grid-cols-5' : ''}`}>
-        {/* 기부 저금통 (Give) */}
-        <div className="bg-pink-100 rounded-3xl p-6 shadow-sm border border-pink-200 flex flex-col items-center hover:shadow-md transition-shadow relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-pink-200 rounded-full blur-3xl opacity-50 -mr-10 -mt-10 group-hover:opacity-70 transition-opacity"></div>
-          {renderMascot(balances.give, 0)}
-          <h3 className="text-xl font-bold text-pink-700 mb-2 relative z-10">기부 저금통</h3>
-          <p className="text-3xl font-black text-pink-900 mb-6 relative z-10">{balances.give.toLocaleString()}원</p>
-          <div className="w-full bg-white/60 backdrop-blur-sm p-4 rounded-2xl text-sm text-pink-800 text-center mt-auto relative z-10">
-            <p className="font-bold text-sm mb-1">🤝 마음 나누기</p>
-            <p className="text-xs opacity-80">유니세프 어린이 돕기 후원</p>
+        <div className="bg-pink-50 rounded-3xl p-6 shadow-sm border border-pink-100 flex flex-col items-center hover:shadow-md transition-shadow">
+          {renderMascot(balances.give, 0, custom.give.emoji)}
+          <h3 className="text-xl font-bold text-gray-800 mb-2">{custom.give.name}</h3>
+          <p className="text-3xl font-black text-gray-950 mb-6">{balances.give.toLocaleString()}원</p>
+          <div className="w-full bg-white/60 backdrop-blur-sm p-4 rounded-2xl text-sm text-gray-800 text-center mt-auto">
+            <p className="font-bold text-sm mb-1">{custom.give.emoji} 나누는 기쁨</p>
+            <p className="text-xs opacity-80">이웃을 위해 모아요</p>
           </div>
         </div>
 
-        {/* 지출 저금통 (Spend) */}
-        <div className="bg-amber-100 rounded-3xl p-6 shadow-sm border border-amber-200 flex flex-col items-center hover:shadow-md transition-shadow relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-amber-200 rounded-full blur-3xl opacity-50 -mr-10 -mt-10 group-hover:opacity-70 transition-opacity"></div>
-          {renderMascot(balances.spend, 0)}
-          <h3 className="text-xl font-bold text-amber-800 mb-2 relative z-10">지출 저금통</h3>
-          <p className="text-3xl font-black text-amber-950 mb-6 relative z-10">{balances.spend.toLocaleString()}원</p>
-          <div className="w-full bg-white/60 backdrop-blur-sm p-4 rounded-2xl text-sm text-amber-900 text-center mt-auto relative z-10">
-            <p className="font-bold text-sm mb-1">💳 똑똑한 소비</p>
-            <p className="text-xs opacity-80">아이쿠카 선불카드 제휴</p>
+        <div className="bg-amber-50 rounded-3xl p-6 shadow-sm border border-amber-100 flex flex-col items-center hover:shadow-md transition-shadow">
+          {renderMascot(balances.spend, 0, custom.spend.emoji)}
+          <h3 className="text-xl font-bold text-gray-800 mb-2">{custom.spend.name}</h3>
+          <p className="text-3xl font-black text-gray-950 mb-6">{balances.spend.toLocaleString()}원</p>
+          <div className="w-full bg-white/60 backdrop-blur-sm p-4 rounded-2xl text-sm text-gray-800 text-center mt-auto">
+            <p className="font-bold text-sm mb-1">{custom.spend.emoji} 내가 쓸 돈</p>
+            <p className="text-xs opacity-80">사고 싶은 걸 사요</p>
           </div>
         </div>
 
-        {/* 투자 저금통 (Invest) */}
-        <div className="bg-emerald-100 rounded-3xl p-6 shadow-sm border border-emerald-200 flex flex-col items-center hover:shadow-md transition-shadow relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-200 rounded-full blur-3xl opacity-50 -mr-10 -mt-10 group-hover:opacity-70 transition-opacity"></div>
-          {renderMascot(balances.invest, 0)}
-          <h3 className="text-xl font-bold text-emerald-800 mb-2 relative z-10">투자 저금통</h3>
-          <p className="text-3xl font-black text-emerald-950 mb-6 relative z-10">{balances.invest.toLocaleString()}원</p>
-          <div className="w-full bg-white/60 backdrop-blur-sm p-4 rounded-2xl text-sm text-emerald-900 text-center mt-auto relative z-10">
-            <p className="font-bold text-sm mb-1">📈 쑥쑥 불리기</p>
-            <p className="text-xs opacity-80">키움증권 소수점 주식 모으기</p>
+        <div className="bg-emerald-50 rounded-3xl p-6 shadow-sm border border-emerald-100 flex flex-col items-center hover:shadow-md transition-shadow relative overflow-hidden">
+          <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-emerald-200 rounded-full opacity-50 blur-2xl"></div>
+          {renderMascot(balances.invest, 0, custom.invest.emoji)}
+          <h3 className="text-xl font-bold text-gray-800 mb-2">{custom.invest.name}</h3>
+          <p className="text-3xl font-black text-gray-950 mb-6 relative z-10">{balances.invest.toLocaleString()}원</p>
+          <div className="w-full bg-white/60 backdrop-blur-sm p-4 rounded-2xl text-sm text-gray-800 text-center mt-auto relative z-10">
+            <p className="font-bold text-sm mb-1">{custom.invest.emoji} 미래의 나에게</p>
+            <p className="text-xs opacity-80">저축하고 이자를 받아요</p>
           </div>
         </div>
 
-        {/* 자유 저금통 (Extra - Premium) */}
         {state.premiumMode && (
-          <div className="bg-gray-100 rounded-3xl p-6 shadow-sm border border-gray-200 flex flex-col items-center hover:shadow-md transition-shadow relative overflow-hidden group">
+          <div className="bg-gray-50 rounded-3xl p-6 shadow-sm border border-gray-200 flex flex-col items-center hover:shadow-md transition-shadow relative overflow-hidden group">
             <div className="absolute top-0 right-0 w-32 h-32 bg-gray-200 rounded-full blur-3xl opacity-50 -mr-10 -mt-10 group-hover:opacity-70 transition-opacity"></div>
             <div className="absolute top-3 right-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] px-2.5 py-1 rounded-full font-bold shadow-sm z-20">
               PREMIUM
             </div>
-            {renderMascot(balances.extra, 0)}
-            <h3 className="text-xl font-bold text-gray-800 mb-2 relative z-10">자유 저금통</h3>
+            {renderMascot(balances.extra, 0, custom.extra.emoji)}
+            <h3 className="text-xl font-bold text-gray-800 mb-2 relative z-10">{custom.extra.name}</h3>
             <p className="text-3xl font-black text-gray-950 mb-6 relative z-10">{balances.extra.toLocaleString()}원</p>
             <div className="w-full bg-white/60 backdrop-blur-sm p-4 rounded-2xl text-sm text-gray-800 text-center mt-auto relative z-10">
-              <p className="font-bold text-sm mb-1">💰 마음대로 쓰기</p>
+              <p className="font-bold text-sm mb-1">{custom.extra.emoji} 마음대로 쓰기</p>
               <p className="text-xs opacity-80">조건 없는 비상금</p>
             </div>
           </div>
@@ -138,7 +140,7 @@ export const Dashboard: React.FC<Props> = ({ state, calculateBalances, childName
             <div className="absolute top-3 right-3 bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-[10px] px-2.5 py-1 rounded-full font-bold shadow-sm z-20">
               PREMIUM
             </div>
-            {renderMascot(balances.wishlist, state.wishlistTarget * 0.8 - 1)}
+            {renderMascot(balances.wishlist, state.wishlistTarget * 0.8 - 1, '🌟')}
             <h3 className="text-xl font-bold text-blue-800 mb-2 relative z-10">🌟 위시리스트</h3>
             <p className="text-3xl font-black text-blue-950 mb-2 relative z-10">{balances.wishlist.toLocaleString()}원</p>
             
