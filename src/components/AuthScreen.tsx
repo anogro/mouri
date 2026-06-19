@@ -5,6 +5,7 @@ import { UserPlus, Lock, Mail, Users, ArrowRight, ShieldCheck } from 'lucide-rea
 interface Props {
   onRegister: (profile: ParentProfile) => void;
   onLogin: () => void;
+  onReset: () => void;
   existingProfile: ParentProfile | null;
 }
 
@@ -17,7 +18,7 @@ const DEFAULT_RULES: BudgetRules = {
   bonusRate: 50,
 };
 
-export const AuthScreen: React.FC<Props> = ({ onRegister, onLogin, existingProfile }) => {
+export const AuthScreen: React.FC<Props> = ({ onRegister, onLogin, onReset, existingProfile }) => {
   const [isLoginMode] = useState(!!existingProfile);
   const [parentName, setParentName] = useState('');
   const [email, setEmail] = useState('');
@@ -119,6 +120,20 @@ export const AuthScreen: React.FC<Props> = ({ onRegister, onLogin, existingProfi
               <button type="submit" className="w-full py-4 bg-indigo-600 text-white rounded-xl font-bold text-lg hover:bg-indigo-700 transition-colors shadow-md flex items-center justify-center gap-2">
                 잠금 해제 <ArrowRight className="w-5 h-5" />
               </button>
+
+              <div className="mt-8 pt-6 border-t border-gray-100 text-center">
+                <button 
+                  type="button" 
+                  onClick={() => {
+                    if (window.confirm('정말 로그아웃(기기 데이터 초기화) 하시겠습니까? 복구할 수 없습니다.')) {
+                      onReset();
+                    }
+                  }}
+                  className="text-sm text-gray-400 hover:text-rose-500 transition-colors underline underline-offset-2"
+                >
+                  기기 데이터 초기화 (완전 로그아웃)
+                </button>
+              </div>
             </form>
           ) : (
             <form onSubmit={handleRegister} className="space-y-5">

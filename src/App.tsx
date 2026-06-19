@@ -79,7 +79,7 @@ function App() {
     
     console.log('[Google Sheets API] Syncing data row:', data);
     try {
-      const response = await fetch('https://script.google.com/macros/s/AKfycbwGQSGdMBxyoQHpEzl2xQmweDTDgN5wcpJ2bEXqR5fbY-tum6besm1dtEpfkVjOnAyaYQ/exec', {
+      const response = await fetch('https://script.google.com/macros/s/AKfycbyEZlyI7iVfzIorSTS22-VYWaOEs2kHMT0sx-6k8wJ8BVibAxTMsX6VV7TM6mtN5vvjyg/exec', {
         method: 'POST',
         headers: {
           'Content-Type': 'text/plain',
@@ -194,7 +194,7 @@ function App() {
     // Send registration data to Google Sheets
     try {
       const childNamesStr = newParent.children.map(c => c.name).join(', ');
-      await fetch('https://script.google.com/macros/s/AKfycbwGQSGdMBxyoQHpEzl2xQmweDTDgN5wcpJ2bEXqR5fbY-tum6besm1dtEpfkVjOnAyaYQ/exec', {
+      await fetch('https://script.google.com/macros/s/AKfycbyEZlyI7iVfzIorSTS22-VYWaOEs2kHMT0sx-6k8wJ8BVibAxTMsX6VV7TM6mtN5vvjyg/exec', {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify({
@@ -245,9 +245,16 @@ function App() {
     });
   };
 
+  const handleReset = () => {
+    localStorage.removeItem('mouri_parent');
+    setParent(null);
+    setCurrentChildId(null);
+    setIsAuthenticated(false);
+  };
+
   // If not authenticated, show Auth Screen
   if (!isAuthenticated) {
-    return <AuthScreen onRegister={handleRegister} onLogin={() => setIsAuthenticated(true)} existingProfile={parent} />;
+    return <AuthScreen onRegister={handleRegister} onLogin={() => setIsAuthenticated(true)} onReset={handleReset} existingProfile={parent} />;
   }
 
   if (!currentChild) return null;
