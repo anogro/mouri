@@ -39,13 +39,13 @@ export const Dashboard: React.FC<Props> = ({ state, calculateBalances, childName
   };
 
   const chartData = [
-    { name: custom.give.name.substring(0,4), value: balances.give > 0 ? balances.give : 0, color: '#fbcfe8' },
-    { name: custom.spend.name.substring(0,4), value: balances.spend > 0 ? balances.spend : 0, color: '#fde68a' },
-    { name: custom.invest.name.substring(0,4), value: balances.invest > 0 ? balances.invest : 0, color: '#a7f3d0' },
+    { name: custom.give.name, value: balances.give > 0 ? balances.give : 0, color: '#fbcfe8' },
+    { name: custom.spend.name, value: balances.spend > 0 ? balances.spend : 0, color: '#fde68a' },
+    { name: custom.invest.name, value: balances.invest > 0 ? balances.invest : 0, color: '#a7f3d0' },
   ];
   
   if (state.premiumMode) {
-    chartData.push({ name: custom.extra.name.substring(0,4), value: balances.extra > 0 ? balances.extra : 0, color: '#e5e7eb' });
+    chartData.push({ name: custom.extra.name, value: balances.extra > 0 ? balances.extra : 0, color: '#e5e7eb' });
     chartData.push({ name: '목표', value: balances.wishlist > 0 ? balances.wishlist : 0, color: '#bfdbfe' });
   }
 
@@ -124,33 +124,33 @@ export const Dashboard: React.FC<Props> = ({ state, calculateBalances, childName
         <motion.div variants={itemVariants} whileHover={{ y: -5 }} className="glass-card glass-card-hover rounded-[2rem] p-6 flex flex-col items-center relative overflow-hidden group">
           <div className="absolute inset-0 bg-pink-300/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
           {renderMascot(balances.give, 0, custom.give.emoji)}
-          <h3 className="text-xl font-bold text-gray-800 mb-2 relative z-10">{custom.give.name}</h3>
-          <p className="text-3xl font-black text-pink-600 mb-6 relative z-10 drop-shadow-sm">{balances.give.toLocaleString()}원</p>
+          <h3 className="text-lg lg:text-xl font-bold text-gray-800 mb-2 relative z-10 break-keep">{custom.give.name}</h3>
+          <p className="text-2xl lg:text-3xl font-black text-pink-600 mb-6 relative z-10 drop-shadow-sm break-keep">{balances.give.toLocaleString()}원</p>
           <div className="w-full bg-white/60 backdrop-blur-md p-4 rounded-2xl text-sm text-gray-800 text-center mt-auto border border-white/50 relative z-10">
-            <p className="font-bold text-sm mb-1">{custom.give.emoji} 나누는 기쁨</p>
-            <p className="text-xs opacity-80 font-medium">착한 일에 써봐요</p>
+            <p className="font-bold text-sm mb-1 whitespace-nowrap">{custom.give.emoji} 나누는 기쁨</p>
+            <p className="text-xs opacity-80 font-medium break-keep">착한 일에 써봐요</p>
           </div>
         </motion.div>
 
         <motion.div variants={itemVariants} whileHover={{ y: -5 }} className="glass-card glass-card-hover rounded-[2rem] p-6 flex flex-col items-center relative overflow-hidden group">
           <div className="absolute inset-0 bg-amber-300/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
           {renderMascot(balances.spend, 0, custom.spend.emoji)}
-          <h3 className="text-xl font-bold text-gray-800 mb-2 relative z-10">{custom.spend.name}</h3>
-          <p className="text-3xl font-black text-amber-600 mb-6 relative z-10 drop-shadow-sm">{balances.spend.toLocaleString()}원</p>
+          <h3 className="text-lg lg:text-xl font-bold text-gray-800 mb-2 relative z-10 break-keep">{custom.spend.name}</h3>
+          <p className="text-2xl lg:text-3xl font-black text-amber-600 mb-6 relative z-10 drop-shadow-sm break-keep">{balances.spend.toLocaleString()}원</p>
           <div className="w-full bg-white/60 backdrop-blur-md p-4 rounded-2xl text-sm text-gray-800 text-center mt-auto border border-white/50 relative z-10">
-            <p className="font-bold text-sm mb-1">{custom.spend.emoji} 내가 쓸 돈</p>
-            <p className="text-xs opacity-80 font-medium">사고 싶은 걸 사요</p>
+            <p className="font-bold text-sm mb-1 whitespace-nowrap">{custom.spend.emoji} 내가 쓸 돈</p>
+            <p className="text-xs opacity-80 font-medium break-keep">사고 싶은 걸 사요</p>
           </div>
         </motion.div>
 
         <motion.div variants={itemVariants} whileHover={{ y: -5 }} className="glass-card glass-card-hover rounded-[2rem] p-6 flex flex-col items-center relative overflow-hidden group">
           <div className="absolute inset-0 bg-emerald-300/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
           {renderMascot(balances.invest, 0, custom.invest.emoji)}
-          <h3 className="text-xl font-bold text-gray-800 mb-2 relative z-10">{custom.invest.name}</h3>
-          <p className="text-3xl font-black text-emerald-600 mb-6 relative z-10 drop-shadow-sm">{balances.invest.toLocaleString()}원</p>
+          <h3 className="text-lg lg:text-xl font-bold text-gray-800 mb-2 relative z-10 break-keep">{custom.invest.name}</h3>
+          <p className="text-2xl lg:text-3xl font-black text-emerald-600 mb-6 relative z-10 drop-shadow-sm break-keep">{balances.invest.toLocaleString()}원</p>
           <div className="w-full bg-white/60 backdrop-blur-md p-4 rounded-2xl text-sm text-gray-800 text-center mt-auto border border-white/50 relative z-10">
-            <p className="font-bold text-sm mb-1">{custom.invest.emoji} 미래의 나에게</p>
-            <p className="text-xs opacity-80 font-medium">저축하고 이자 받기</p>
+            <p className="font-bold text-sm mb-1 whitespace-nowrap">{custom.invest.emoji} 미래의 나에게</p>
+            <p className="text-xs opacity-80 font-medium break-keep">저축하고 이자 받기</p>
           </div>
         </motion.div>
 
@@ -161,11 +161,11 @@ export const Dashboard: React.FC<Props> = ({ state, calculateBalances, childName
               PREMIUM
             </div>
             {renderMascot(balances.extra, 0, custom.extra.emoji)}
-            <h3 className="text-xl font-bold text-gray-800 mb-2 relative z-10">{custom.extra.name}</h3>
-            <p className="text-3xl font-black text-gray-700 mb-6 relative z-10 drop-shadow-sm">{balances.extra.toLocaleString()}원</p>
+            <h3 className="text-lg lg:text-xl font-bold text-gray-800 mb-2 relative z-10 break-keep">{custom.extra.name}</h3>
+            <p className="text-2xl lg:text-3xl font-black text-gray-700 mb-6 relative z-10 drop-shadow-sm break-keep">{balances.extra.toLocaleString()}원</p>
             <div className="w-full bg-white/60 backdrop-blur-md p-4 rounded-2xl text-sm text-gray-800 text-center mt-auto border border-white/50 relative z-10">
-              <p className="font-bold text-sm mb-1">{custom.extra.emoji} 마음대로</p>
-              <p className="text-xs opacity-80 font-medium">조건 없는 비상금</p>
+              <p className="font-bold text-sm mb-1 whitespace-nowrap">{custom.extra.emoji} 마음대로</p>
+              <p className="text-xs opacity-80 font-medium break-keep">조건 없는 비상금</p>
             </div>
           </motion.div>
         )}
@@ -177,8 +177,8 @@ export const Dashboard: React.FC<Props> = ({ state, calculateBalances, childName
               PREMIUM
             </div>
             {renderMascot(balances.wishlist, state.wishlistTarget * 0.8 - 1, '🌟')}
-            <h3 className="text-xl font-bold text-gray-800 mb-2 relative z-10">🌟 위시리스트</h3>
-            <p className="text-3xl font-black text-blue-600 mb-2 relative z-10 drop-shadow-sm">{balances.wishlist.toLocaleString()}원</p>
+            <h3 className="text-lg lg:text-xl font-bold text-gray-800 mb-2 relative z-10 break-keep">🌟 위시리스트</h3>
+            <p className="text-2xl lg:text-3xl font-black text-blue-600 mb-2 relative z-10 drop-shadow-sm break-keep">{balances.wishlist.toLocaleString()}원</p>
             
             <div className="w-full mb-6 relative z-10">
               <div className="flex justify-between text-xs text-gray-600 mb-2 font-bold">
