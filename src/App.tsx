@@ -295,8 +295,8 @@ function App() {
   if (!currentChild) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20 font-sans selection:bg-indigo-100">
-      <header className="bg-white sticky top-0 z-40 border-b border-gray-100 shadow-sm/50 backdrop-blur-md bg-white/80">
+    <div className={`min-h-screen pb-20 font-sans selection:bg-indigo-100 ${currentChild.premiumMode ? 'mesh-bg-premium' : 'mesh-bg'}`}>
+      <header className="sticky top-0 z-40 bg-white/40 backdrop-blur-xl border-b border-white/50 shadow-sm">
         <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-inner">
